@@ -16,3 +16,5 @@ export const JoinUs = () => {
         </section>
     )
 }
+
+export default JoinUs;
