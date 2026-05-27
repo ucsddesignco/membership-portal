@@ -17,7 +17,7 @@ export const SignUp = () => {
                 <input type="text" placeholder="major" className="px-20 py-4 bg-white text-black text-center" />
             </div>
 
-            <Link href="/" className="mt-8 bg-white px-[2rem] py-[1rem] text-black">
+            <Link href="/Home" className="mt-8 bg-white px-[2rem] py-[1rem] text-black">
                 {"sign up"}
             </Link>
         </section>
