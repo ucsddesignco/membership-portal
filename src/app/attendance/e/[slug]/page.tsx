@@ -67,7 +67,7 @@ export default async function EventPage({
         <p className="text-center text-xs leading-relaxed text-neutral-400">
           ✨ Design tip of the day:
           <br />
-          Use Option key to measure in Figma!
+          Dont be scared of scale!
         </p>
       </div>
     </main>
