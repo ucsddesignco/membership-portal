@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import { useEffect, useState } from 'react'
+import ThanksForAttending from './ThanksForAttending'
 
 export default function CheckinButton({
   eventId,
@@ -14,13 +15,32 @@ export default function CheckinButton({
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const [awardedPoints, setAwardedPoints] = useState<number | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       setUser(data.user)
+
+      // If this user already checked into this event, skip straight to
+      // the confirmation screen instead of showing the check-in button
+      // again — makes the confirmation persist across reloads/revisits.
+      if (data.user) {
+        const { data: existingCheckin } = await supabase
+          .from('checkins')
+          .select('points_awarded')
+          .eq('user_id', data.user.id)
+          .eq('event_id', eventId)
+          .maybeSingle()
+
+        if (existingCheckin) {
+          setAwardedPoints(existingCheckin.points_awarded)
+          setStatus('done')
+        }
+      }
+
       setCheckingAuth(false)
     })
-  }, [])
+  }, [eventId])
 
   async function handleGoogleLogin() {
     await supabase.auth.signInWithOAuth({
@@ -75,12 +95,13 @@ export default function CheckinButton({
       return
     }
 
+    setAwardedPoints(event.points)
     setStatus('done')
   }
 
   if (checkingAuth) return <p>Loading...</p>
 
-  if (status === 'done') return <p>Checked in! Points added.</p>
+  if (status === 'done') return <ThanksForAttending points={awardedPoints ?? 0} />
 
   if (!user) {
     return (
