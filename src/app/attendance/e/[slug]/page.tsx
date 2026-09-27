@@ -34,7 +34,7 @@ export default async function EventPage({
             <img
               src={event.thumbnail_url || '/GraphicHolder.png'}
               alt={event.name}
-              className="block h-auto w-full"
+              className="block h-auto w-full border-1 border-white"
             />
 
             {/* Arrow on the bottom-right corner of the graphic */}
@@ -60,7 +60,7 @@ export default async function EventPage({
           </div>
 
           <div className="mt-4 w-full [&_button]:w-full [&_button]:bg-white [&_button]:py-4 [&_button]:text-sm [&_button]:text-black [&_button]:hover:bg-neutral-200 [&_button]:disabled:opacity-50">
-            <CheckinButton eventId={event.id} eventSlug={slug} />
+            <CheckinButton eventId={event.id} eventSlug={slug} eventName={event.name} />
           </div>
         </div>
 

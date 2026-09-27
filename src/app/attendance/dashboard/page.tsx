@@ -1,8 +1,65 @@
-'use client';
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function DashboardPage() {
-  const fullName = 'Lauren';
-  const totalPoints = 250;
+  const [fullName, setFullName] = useState('')
+  const [totalPoints, setTotalPoints] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        window.location.href = '/attendance/login'
+        return
+      }
+
+      if (!user.email?.endsWith('@ucsd.edu')) {
+        await supabase.auth.signOut()
+        window.location.href = '/attendance/login'
+        return
+      }
+
+      const firstName =
+        user.user_metadata.given_name ??
+        user.user_metadata.full_name?.split(' ')[0] ??
+        user.email
+
+      setFullName(firstName)
+
+      // Create the profile row on first login, no-op on repeat logins
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata.full_name ?? user.email,
+      })
+
+      // Sum up their points from checkins
+      const { data: checkins } = await supabase
+        .from('checkins')
+        .select('points_awarded')
+        .eq('user_id', user.id)
+
+      const total = checkins?.reduce((sum, row) => sum + row.points_awarded, 0) ?? 0
+      setTotalPoints(total)
+      setLoading(false)
+    }
+
+    init()
+  }, [])
+
+  if (loading) {
+    return (
+      <main className="min-h-dvh bg-black text-white">
+        <div className="flex min-h-dvh items-center justify-center">
+          <p className="text-[11px]">Loading...</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-dvh bg-black text-white">

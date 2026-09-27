@@ -31,7 +31,7 @@ export default function AttendanceLoginPage() {
         </svg>
         <svg
           aria-hidden="true"
-          className="absolute left-[-10%] top-[51%] h-[22px] w-[22px]"
+          className="absolute left-[12%] top-[41%] h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill="none"
           stroke="white"
@@ -48,9 +48,8 @@ export default function AttendanceLoginPage() {
 
           <button
             onClick={handleGoogleLogin}
-            className="mt-4 w-full w-full bg-white py-4 text-sm text-black hover:bg-neutral-200 disabled:opacity-50"
+            className="mt-10 rounded-full bg-white px-6 py-3 text-[13px] font-medium text-black"
           >
-            
             Sign in with UCSD Google Account
           </button>
 

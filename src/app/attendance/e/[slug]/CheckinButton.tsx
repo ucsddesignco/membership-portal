@@ -7,39 +7,42 @@ import ThanksForAttending from './ThanksForAttending'
 export default function CheckinButton({
   eventId,
   eventSlug,
+  eventName,
 }: {
   eventId: string
   eventSlug: string
+  eventName: string
 }) {
   const [user, setUser] = useState<any>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
-  const [awardedPoints, setAwardedPoints] = useState<number | null>(null)
+  const [awardedPoints, setAwardedPoints] = useState(0)
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      setUser(data.user)
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
 
-      // If this user already checked into this event, skip straight to
-      // the confirmation screen instead of showing the check-in button
-      // again — makes the confirmation persist across reloads/revisits.
-      if (data.user) {
-        const { data: existingCheckin } = await supabase
+      if (user) {
+        // Check for a real, existing checkin — not just leftover client state
+        const { data: existing } = await supabase
           .from('checkins')
           .select('points_awarded')
-          .eq('user_id', data.user.id)
+          .eq('user_id', user.id)
           .eq('event_id', eventId)
           .maybeSingle()
 
-        if (existingCheckin) {
-          setAwardedPoints(existingCheckin.points_awarded)
+        if (existing) {
+          setAwardedPoints(existing.points_awarded)
           setStatus('done')
         }
       }
 
       setCheckingAuth(false)
-    })
+    }
+
+    init()
   }, [eventId])
 
   async function handleGoogleLogin() {
@@ -99,18 +102,12 @@ export default function CheckinButton({
     setStatus('done')
   }
 
-  if (checkingAuth) return <p>Loading...</p>
+  if (checkingAuth) return <p className='flex items-center justify-center'>Loading...</p>
 
-  if (status === 'done') return <ThanksForAttending points={awardedPoints ?? 0} />
+  if (status === 'done') return <ThanksForAttending points={awardedPoints} eventName={eventName}/>
 
   if (!user) {
-    return (
-      <div>
-        <button onClick={handleGoogleLogin}>
-          Sign in with UCSD Account
-        </button>
-      </div>
-    )
+    return <button onClick={handleGoogleLogin}>Sign in with UCSD Account</button>
   }
 
   return (
@@ -118,7 +115,7 @@ export default function CheckinButton({
       <button onClick={handleCheckin} disabled={status === 'loading'}>
         {status === 'loading' ? 'Checking in...' : 'Check in'}
       </button>
-      {status === 'error' && <p>{errorMsg}</p>}
+      {status === 'error' && <p className='flex items-center justify-center pt-2'>{errorMsg}</p>}
     </div>
   )
 }

@@ -1,9 +1,5 @@
-import { JoinUs } from "./JoinUs/page";
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-  return (
-    <>
-      <JoinUs/>
-    </>
-  );
+export default function RootPage() {
+  redirect('/attendance/dashboard')
 }
