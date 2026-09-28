@@ -29,10 +29,11 @@ export default function ThanksForAttending({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black text-white">
       <div
-        className="relative mx-auto w-full max-w-[393px]"
+        className="mx-auto flex w-full max-w-[393px] items-center justify-center py-10"
         style={{ minHeight: "max(100dvh, 680px)" }}
       >
-        <div className="absolute left-[64px] top-[248px] flex w-[266px] flex-col gap-[49px] text-center">
+        {/* Content group: arrows are positioned relative to this, so everything stays together */}
+        <div className="relative flex w-[266px] flex-col gap-[49px] text-center">
           <div>
             <p className="font-plak text-[32px] font-bold leading-[1.2]">Thanks for attending!</p>
             <p className="font-sans text-[16px] leading-normal text-white/70">{eventName}</p>
@@ -52,20 +53,21 @@ export default function ThanksForAttending({
           >
             Go to Dashboard
           </button>
-        </div>
 
-        <div
-          className="absolute left-[12.98%] top-[336px] flex h-[36.565px] w-[9.26%] items-center justify-center"
-          style={{ containerType: "size" }}
-        >
-          <div className="h-[100cqw] w-[100cqh] flex-none rotate-90">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/thanks-arrow-lower-left.svg" alt="" className="block h-full w-full" />
+          {/* Decorative arrows, offset from the content group's top-left corner */}
+          <div
+            className="absolute -left-[13px] top-[88px] flex h-[36.565px] w-[36.4px] items-center justify-center"
+            style={{ containerType: "size" }}
+          >
+            <div className="h-[100cqw] w-[100cqh] flex-none rotate-90">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/thanks-arrow-lower-left.svg" alt="" className="block h-full w-full" />
+            </div>
           </div>
-        </div>
-        <div className="absolute left-[74.55%] right-[16.14%] top-[201.6px] h-[36.4px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/thanks-arrow-upper-right.svg" alt="" className="block h-full w-full" />
+          <div className="absolute left-[229px] -top-[46px] h-[36.4px] w-[36.6px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/thanks-arrow-upper-right.svg" alt="" className="block h-full w-full" />
+          </div>
         </div>
       </div>
     </div>
