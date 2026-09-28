@@ -107,12 +107,12 @@ export default function CheckinButton({
   if (status === 'done') return <ThanksForAttending points={awardedPoints} eventName={eventName}/>
 
   if (!user) {
-    return <button onClick={handleGoogleLogin}>Sign in with UCSD Account</button>
+    return <button className='flex w-full items-center justify-center bg-white text-center text-sm text-black hover:bg-neutral-200 disabled:opacity-50' onClick={handleGoogleLogin}>Sign in with UCSD Account</button>
   }
 
   return (
     <div>
-      <button onClick={handleCheckin} disabled={status === 'loading'}>
+      <button onClick={handleCheckin} disabled={status === 'loading'} className='flex w-full items-center justify-center bg-white text-center text-sm text-black hover:bg-neutral-200 disabled:opacity-50'>
         {status === 'loading' ? 'Checking in...' : 'Check in'}
       </button>
       {status === 'error' && <p className='flex items-center justify-center pt-2'>{errorMsg}</p>}

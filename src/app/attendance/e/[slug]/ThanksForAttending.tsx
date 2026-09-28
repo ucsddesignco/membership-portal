@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function ThanksForAttending({ points, eventName }: { points: number; eventName: string}) {
+export default function ThanksForAttending({
+  points,
+  eventName,
+}: {
+  points: number;
+  eventName: string;
+}) {
   const router = useRouter();
 
   const [displayed, setDisplayed] = useState(0);
@@ -21,8 +27,11 @@ export default function ThanksForAttending({ points, eventName }: { points: numb
   }, [points]);
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 min-h-screen overflow-y-auto bg-black text-white">
-      <div className="relative mx-auto min-h-screen w-full max-w-[393px]">
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black text-white">
+      <div
+        className="relative mx-auto w-full max-w-[393px]"
+        style={{ minHeight: "max(100dvh, 680px)" }}
+      >
         <div className="absolute left-[64px] top-[248px] flex w-[266px] flex-col gap-[49px] text-center">
           <div>
             <p className="font-plak text-[32px] font-bold leading-[1.2]">Thanks for attending!</p>
@@ -36,14 +45,14 @@ export default function ThanksForAttending({ points, eventName }: { points: numb
               <p className="font-sans text-[25px] leading-normal">points</p>
             </div>
           </div>
-        </div>
 
-        <button
-          onClick={() => router.push("/attendance/dashboard")}
-          className="absolute bottom-[68px] mt-4 w-full [&_button]:w-full [&_button]:bg-white [&_button]:py-4 [&_button]:text-sm [&_button]:text-black [&_button]:hover:bg-neutral-200 [&_button]:disabled:opacity-50"
-        >
-          Go to Dashboard
-        </button>
+          <button
+            onClick={() => router.push("/attendance/dashboard")}
+            className="w-full bg-white py-4 text-sm text-black hover:bg-neutral-200"
+          >
+            Go to Dashboard
+          </button>
+        </div>
 
         <div
           className="absolute left-[12.98%] top-[336px] flex h-[36.565px] w-[9.26%] items-center justify-center"
