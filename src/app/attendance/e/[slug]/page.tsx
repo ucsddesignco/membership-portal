@@ -59,7 +59,7 @@ export default async function EventPage({
             <p className="mt-1 text-sm">Sign in for attendance points :)</p>
           </div>
 
-          <div className="bottom-[68px] mt-4 w-full w-full bg-white py-4 text-sm text-black hover:bg-neutral-200 disabled:opacity-50">
+          <div className="mt-4 w-full">
             <CheckinButton eventId={event.id} eventSlug={slug} eventName={event.name} />
           </div>
         </div>
