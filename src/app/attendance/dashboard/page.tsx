@@ -66,7 +66,7 @@ export default function DashboardPage() {
           src="/arrow2.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute right-[12%] top-[24%] h-auto w-[38px]"
+          className="pointer-events-none absolute right-[12%] top-[18%] h-auto w-[38px]"
         />
         <img
           src="/arrow1.svg"
