@@ -22,13 +22,13 @@ export default function AttendanceLoginPage() {
           src="/arrow2.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute right-[12%] top-[24%] h-auto w-[38px]"
+          className="pointer-events-none absolute right-[8%] top-[14%] h-auto w-[38px]"
         />
         <img
           src="/arrow1.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute left-[-6%] top-[51%] h-auto w-[38px]"
+          className="pointer-events-none absolute left-[8%] top-[60%] h-auto w-[38px]"
         />
 
         <section className="flex flex-1 flex-col items-center justify-center pb-24 text-center">

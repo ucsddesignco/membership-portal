@@ -15,7 +15,7 @@ export default function HomePage() {
           src="/arrow1.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute left-[-5%] top-[68%] h-auto w-[38px]"
+          className="pointer-events-none absolute left-[10%] top-[68%] h-auto w-[38px]"
         />
 
         <h1 className="text-3xl font-extrabold">DesignCo Membership Portal</h1>

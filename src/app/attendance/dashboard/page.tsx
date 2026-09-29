@@ -72,7 +72,7 @@ export default function DashboardPage() {
           src="/arrow1.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute left-[12%] top-[41%] h-auto w-[38px]"
+          className="pointer-events-none absolute left-[12%] top-[61%] h-auto w-[38px]"
         />
 
         <section className="flex flex-1 flex-col items-center justify-center pb-24 text-center">
