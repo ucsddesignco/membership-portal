@@ -111,11 +111,11 @@ export default function CheckinButton({
   }
 
   return (
-    <div>
+    <div className='relative'>
       <button onClick={handleCheckin} disabled={status === 'loading'} className='py-4 flex w-full items-center justify-center bg-white text-center text-sm text-black hover:bg-neutral-200 disabled:opacity-50'>
         {status === 'loading' ? 'Checking in...' : 'Check in'}
       </button>
-      {status === 'error' && <p className='flex items-center justify-center pt-2'>{errorMsg}</p>}
+      {status === 'error' && <p className='absolute inset-x-0 top-full flex items-center justify-center pt-2 text-center text-sm'>{errorMsg}</p>}
     </div>
   )
 }

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 export default function ThanksForAttending({
   points,
-  eventName,
 }: {
   points: number;
   eventName: string;
@@ -36,7 +35,6 @@ export default function ThanksForAttending({
         <div className="relative flex w-[266px] flex-col gap-[49px] text-center">
           <div>
             <p className="font-plak text-[32px] font-bold leading-[1.2]">Thanks for attending!</p>
-            <p className="font-sans text-[16px] leading-normal text-white/70">{eventName}</p>
           </div>
 
           <div className="flex flex-col">
@@ -61,13 +59,14 @@ export default function ThanksForAttending({
           >
             <div className="h-[100cqw] w-[100cqh] flex-none rotate-90">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/thanks-arrow-lower-left.svg" alt="" className="block h-full w-full" />
+              <img src="/arrow-left.svg" alt="" className="block h-full w-full" />
             </div>
           </div>
           <div className="absolute left-[229px] -top-[46px] h-[36.4px] w-[36.6px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/thanks-arrow-upper-right.svg" alt="" className="block h-full w-full" />
+            <img src="/arrow-right.svg" alt="" className="block h-full w-full" />
           </div>
+          <p className="text-center text-neutral-400">Exchange points for merchandise in the future!</p>
         </div>
       </div>
     </div>

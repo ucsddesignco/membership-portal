@@ -39,7 +39,7 @@ export default async function EventPage({
 
             {/* Arrow on the bottom-right corner of the graphic */}
             <img
-              src="/arrow2.svg"
+              src="/arrow-right.svg"
               alt=""
               aria-hidden="true"
               className="pointer-events-none absolute left-[81%] top-[94.5%] h-auto w-[13%]"
@@ -47,10 +47,10 @@ export default async function EventPage({
 
             {/* Arrow just below the graphic, on the left */}
             <img
-              src="/arrow1.svg"
+              src="/arrow-left.svg"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute -left-[2%] top-[108.5%] h-auto w-[13%]"
+              className="pointer-events-none absolute -left-[2%] top-[108.5%] h-auto w-[13%] rotate-90"
             />
           </div>
 
@@ -64,8 +64,8 @@ export default async function EventPage({
           </div>
         </div>
 
-        <p className="text-center text-xs leading-relaxed text-neutral-400">
-          ✨ Design tip of the day:
+        <p className="text-center leading-relaxed text-neutral-400">
+          Design tip of the day:
           <br />
           Dont be scared of scale!
         </p>

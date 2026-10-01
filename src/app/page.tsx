@@ -6,16 +6,16 @@ export default function HomePage() {
     <main className="min-h-screen bg-black text-white">
       <div className="relative mx-auto flex min-h-screen w-full max-w-[390px] flex-col items-center justify-center px-6 text-center">
         <img
-          src="/arrow2.svg"
+          src="/arrow-right.svg"
           alt=""
           aria-hidden="true"
           className="pointer-events-none absolute right-[12%] top-[24%] h-auto w-[38px]"
         />
         <img
-          src="/arrow1.svg"
+          src="/arrow-left.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute left-[10%] top-[68%] h-auto w-[38px]"
+          className="pointer-events-none absolute left-[10%] top-[68%] h-auto w-[38px] rotate-90"
         />
 
         <h1 className="text-3xl font-extrabold">DesignCo Membership Portal</h1>

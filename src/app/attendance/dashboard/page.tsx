@@ -63,16 +63,16 @@ export default function DashboardPage() {
     <main className="min-h-dvh bg-black text-white">
       <div className="relative mx-auto flex min-h-dvh w-full max-w-[390px] flex-col items-center px-6 pb-10 pt-6">
         <img
-          src="/arrow2.svg"
+          src="/arrow-right.svg"
           alt=""
           aria-hidden="true"
           className="pointer-events-none absolute right-[12%] top-[18%] h-auto w-[38px]"
         />
         <img
-          src="/arrow1.svg"
+          src="/arrow-left.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute left-[12%] top-[61%] h-auto w-[38px]"
+          className="pointer-events-none absolute left-[12%] top-[61%] h-auto w-[38px] rotate-90"
         />
 
         <section className="flex flex-1 flex-col items-center justify-center pb-24 text-center">
