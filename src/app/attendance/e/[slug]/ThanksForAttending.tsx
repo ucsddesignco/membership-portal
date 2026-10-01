@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function ThanksForAttending({
   points,
+  eventName,
 }: {
   points: number;
   eventName: string;
@@ -35,6 +36,7 @@ export default function ThanksForAttending({
         <div className="relative flex w-[266px] flex-col gap-[49px] text-center">
           <div>
             <p className="font-plak text-[32px] font-bold leading-[1.2]">Thanks for attending!</p>
+            <p className="font-sans text-[16px] leading-normal text-white/70">{eventName}</p>
           </div>
 
           <div className="flex flex-col">
