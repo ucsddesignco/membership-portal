@@ -5,9 +5,15 @@ import { useRouter } from "next/navigation";
 
 export default function ThanksForAttending({
   points,
+  bonusPoints = 0,
+  streakCount = 0,
+  multiplier = 1,
   eventName,
 }: {
   points: number;
+  bonusPoints?: number;
+  streakCount?: number;
+  multiplier?: number;
   eventName: string;
 }) {
   const router = useRouter();
@@ -44,6 +50,11 @@ export default function ThanksForAttending({
             <div className="flex flex-col gap-[9px]">
               <p className="font-plak text-[70px] font-bold leading-[1.2]">{displayed}</p>
               <p className="font-sans text-[25px] leading-normal">points</p>
+              {bonusPoints > 0 && (
+                <p>
+                  +{bonusPoints} streak bonus · {streakCount}-event streak · {multiplier}x
+                </p>
+              )}
             </div>
           </div>
 

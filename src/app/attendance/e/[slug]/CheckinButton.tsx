@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useState } from 'react';
 import ThanksForAttending from './ThanksForAttending';
 import DevPasswordLogin, { isLocalSupabaseDev } from './DevPasswordLogin';
+import { bonusFor, computeStreak, multiplierFor } from '@/lib/streak';
 
 export default function CheckinButton({
   eventId,
@@ -21,6 +22,8 @@ export default function CheckinButton({
   );
   const [errorMsg, setErrorMsg] = useState('');
   const [awardedPoints, setAwardedPoints] = useState(0);
+  const [bonusPoints, setBonusPoints] = useState(0);
+  const [streakCount, setStreakCount] = useState(0);
 
   useEffect(() => {
     async function init() {
@@ -39,13 +42,15 @@ export default function CheckinButton({
 
         const { data: existing } = await supabase
           .from('checkins')
-          .select('points_awarded')
+          .select('points_awarded, bonus_points, streak_count')
           .eq('user_id', user.id)
           .eq('event_id', eventId)
           .maybeSingle();
 
         if (existing) {
           setAwardedPoints(existing.points_awarded);
+          setBonusPoints(existing.bonus_points);
+          setStreakCount(existing.streak_count);
           setStatus('done');
         }
       }
@@ -71,7 +76,7 @@ export default function CheckinButton({
 
     const { data: event } = await supabase
       .from('events')
-      .select('*')
+      .select('*, counts_toward_streak')
       .eq('id', eventId)
       .single();
 
@@ -93,10 +98,49 @@ export default function CheckinButton({
       return;
     }
 
+    let streak = 0;
+    let bonus = 0;
+    if (event.counts_toward_streak) {
+      let streakEventsQuery = supabase
+        .from('events')
+        .select('id, active_start, counts_toward_streak')
+        .eq('counts_toward_streak', true);
+      if (event.active_start) {
+        streakEventsQuery = streakEventsQuery.lt(
+          'active_start',
+          event.active_start,
+        );
+      }
+
+      const [
+        { data: streakEvents, error: streakEventsError },
+        { data: userCheckins, error: userCheckinsError },
+      ] = await Promise.all([
+        streakEventsQuery,
+        supabase.from('checkins').select('event_id').eq('user_id', user.id),
+      ]);
+
+      const fetchError = streakEventsError ?? userCheckinsError;
+      if (fetchError) {
+        setStatus('error');
+        setErrorMsg(fetchError.message);
+        return;
+      }
+
+      streak = computeStreak(
+        event,
+        streakEvents ?? [],
+        (userCheckins ?? []).map((c) => c.event_id),
+      );
+      bonus = bonusFor(event.points, streak);
+    }
+
     const { error } = await supabase.from('checkins').insert({
       user_id: user.id,
       event_id: eventId,
       points_awarded: event.points,
+      bonus_points: bonus,
+      streak_count: streak,
     });
 
     if (error) {
@@ -110,6 +154,8 @@ export default function CheckinButton({
     }
 
     setAwardedPoints(event.points);
+    setBonusPoints(bonus);
+    setStreakCount(streak);
     setStatus('done');
   }
 
@@ -117,7 +163,15 @@ export default function CheckinButton({
     return <p className="flex items-center justify-center">Loading...</p>;
 
   if (status === 'done')
-    return <ThanksForAttending points={awardedPoints} eventName={eventName} />;
+    return (
+      <ThanksForAttending
+        points={awardedPoints}
+        bonusPoints={bonusPoints}
+        streakCount={streakCount}
+        multiplier={multiplierFor(streakCount)}
+        eventName={eventName}
+      />
+    );
 
   if (!user) {
     return (
