@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useState } from 'react';
 import ThanksForAttending from './ThanksForAttending';
+import DevPasswordLogin, { isLocalSupabaseDev } from './DevPasswordLogin';
 
 export default function CheckinButton({
   eventId,
@@ -120,12 +121,15 @@ export default function CheckinButton({
 
   if (!user) {
     return (
-      <button
-        className="flex w-full items-center justify-center bg-white text-center text-sm text-black hover:bg-neutral-200 disabled:opacity-50 py-4"
-        onClick={handleGoogleLogin}
-      >
-        Sign in with UCSD Account
-      </button>
+      <>
+        <button
+          className="flex w-full items-center justify-center bg-white text-center text-sm text-black hover:bg-neutral-200 disabled:opacity-50 py-4"
+          onClick={handleGoogleLogin}
+        >
+          Sign in with UCSD Account
+        </button>
+        {isLocalSupabaseDev && <DevPasswordLogin />}
+      </>
     );
   }
 
