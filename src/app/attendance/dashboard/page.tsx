@@ -38,10 +38,11 @@ export default function DashboardPage() {
 
       const { data: checkins } = await supabase
         .from('checkins')
-        .select('points_awarded')
+        .select('points_awarded, bonus_points')
         .eq('user_id', user.id)
 
-      const total = checkins?.reduce((sum, row) => sum + row.points_awarded, 0) ?? 0
+      const total =
+        checkins?.reduce((sum, row) => sum + row.points_awarded + row.bonus_points, 0) ?? 0
       setTotalPoints(total)
       setLoading(false)
     }
