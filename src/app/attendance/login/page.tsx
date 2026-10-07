@@ -1,6 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabaseClient'
+import Footer from '../Footer'
 import DevPasswordLogin, { isLocalSupabaseDev } from '../e/[slug]/DevPasswordLogin'
 
 export default function AttendanceLoginPage() {
@@ -51,9 +52,7 @@ export default function AttendanceLoginPage() {
           </p>
         </section>
 
-        <p className="max-w-[170px] text-center text-xs leading-relaxed text-neutral-400">
-          Exchange points for merchandise in the future!
-        </p>
+        <Footer>Exchange points for merchandise in the future!</Footer>
       </div>
     </main>
   );

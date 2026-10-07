@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import Footer from '../Footer'
 import { isLocalSupabaseDev } from '../e/[slug]/DevPasswordLogin'
 
 export default function DashboardPage() {
@@ -89,9 +90,7 @@ export default function DashboardPage() {
           <p className="mt-5 text-sm">points total</p>
         </section>
 
-        <p className="max-w-[170px] text-center text-xs leading-relaxed text-neutral-400">
-          Exchange points for merchandise in the future!
-        </p>
+        <Footer>Exchange points for merchandise in the future!</Footer>
       </div>
     </main>
   );

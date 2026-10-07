@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Footer from "../../Footer";
 
 export default function ThanksForAttending({
   points,
@@ -83,9 +84,11 @@ export default function ThanksForAttending({
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black text-white">
       <div
         data-slide-clip
-        className="mx-auto flex w-full max-w-[393px] items-center justify-center overflow-x-clip py-10"
+        className="mx-auto flex w-full max-w-[393px] flex-col items-center gap-10 overflow-x-clip py-10"
         style={{ minHeight: "max(100dvh, 680px)" }}
       >
+        {/* Takes the leftover height so the content stays centered and the footer sits at the bottom */}
+        <div className="flex flex-1 items-center">
         {/* Content group: arrows are positioned relative to this, so everything stays together */}
         <div className="relative flex w-[266px] flex-col gap-[49px] text-center">
           <div>
@@ -154,13 +157,19 @@ export default function ThanksForAttending({
               )}
           </div>
 
+          {/* Space stays reserved; fades in once the final count-up finishes */}
           <button
             onClick={() => router.push("/attendance/dashboard")}
-            className="w-full bg-white py-4 text-sm text-black hover:bg-neutral-200"
+            disabled={phase !== "done"}
+            aria-hidden={phase !== "done"}
+            className={`w-full bg-white py-4 text-sm text-black transition-opacity duration-[400ms] hover:bg-neutral-200 motion-reduce:transition-none ${phase === "done" ? "opacity-100" : "pointer-events-none opacity-0"}`}
           >
             Go to Dashboard
           </button>
         </div>
+        </div>
+
+        <Footer>🔥 Streak: Attend events in a row to earn even more points!</Footer>
       </div>
     </div>
   );
