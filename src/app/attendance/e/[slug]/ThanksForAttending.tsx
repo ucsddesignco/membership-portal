@@ -8,13 +8,13 @@ export default function ThanksForAttending({
   bonusPoints = 0,
   streakCount = 0,
   multiplier = 1,
-  eventName,
+  firstName,
 }: {
   points: number;
   bonusPoints?: number;
   streakCount?: number;
   multiplier?: number;
-  eventName: string;
+  firstName: string;
 }) {
   const router = useRouter();
   const multiplierText = `x${multiplier} STREAK MULTIPLIER`;
@@ -89,8 +89,11 @@ export default function ThanksForAttending({
         {/* Content group: arrows are positioned relative to this, so everything stays together */}
         <div className="relative flex w-[266px] flex-col gap-[49px] text-center">
           <div>
-            <p className="font-plak text-[32px] font-bold leading-[1.2]">Thanks for attending!</p>
-            <p className="font-sans text-[16px] leading-normal text-white/70">{eventName}</p>
+            <p className="font-plak text-[32px] font-bold leading-[1.2]">
+              Thanks for attending,
+              <br />
+              {firstName}!
+            </p>
           </div>
 
           <div className="flex flex-col gap-[16px]">
@@ -110,6 +113,7 @@ export default function ThanksForAttending({
                 {(<p className="font-sans text-[16px] leading-normal">You received:</p>)}
               </div>
             </div>
+            <div className="relative">
             {/* Both panels share one grid cell, so the box keeps the taller one's height */}
             <div className="grid py-[18px] bg-white">
               {bonusPoints > 0 && (
@@ -130,6 +134,17 @@ export default function ThanksForAttending({
                 <p className="font-sans text-[24px] text-black leading-normal">points</p>
               </div>
             </div>
+
+            {/* Decorative cursors, anchored to the points box's corners */}
+            <div className="absolute -top-[26px] right-[17.44px] h-[36.4px] w-[36.565px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/cursor.svg" alt="" className="block h-full w-full" />
+            </div>
+            <div className="absolute -bottom-[10.4px] left-[20px] h-[36.4px] w-[36.565px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/cursor.svg" alt="" className="block h-full w-full -scale-x-100" />
+            </div>
+            </div>
               {bonusPoints > 0 && (
                 <SlideInText
                   className="font-plak text-[20px] font-bold"
@@ -145,21 +160,6 @@ export default function ThanksForAttending({
           >
             Go to Dashboard
           </button>
-
-          {/* Decorative arrows, offset from the content group's top-left corner */}
-          <div
-            className="absolute -left-[13px] top-[88px] flex h-[36.565px] w-[36.4px] items-center justify-center"
-            style={{ containerType: "size" }}
-          >
-            <div className="h-[100cqw] w-[100cqh] flex-none rotate-90">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/thanks-arrow-lower-left.svg" alt="" className="block h-full w-full" />
-            </div>
-          </div>
-          <div className="absolute left-[229px] -top-[46px] h-[36.4px] w-[36.6px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/thanks-arrow-upper-right.svg" alt="" className="block h-full w-full" />
-          </div>
         </div>
       </div>
     </div>
