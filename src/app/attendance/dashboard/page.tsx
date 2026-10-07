@@ -79,7 +79,7 @@ export default function DashboardPage() {
                 aria-hidden="true"
                 width={36.565}
                 height={36.3996}
-                className="pointer-events-none absolute -top-[44px] left-[229px]"
+                className="pointer-events-none absolute top-[94px] left-[229px]"
               />
               <h1 className="font-plak text-[32px] font-bold leading-[1.2]">
                 Hello {fullName}!
