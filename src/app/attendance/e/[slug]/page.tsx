@@ -66,9 +66,7 @@ export default async function EventPage({
         </div>
 
         <Footer>
-          ✨ Design tip of the day:
-          <br />
-          Dont be scared of scale!
+          ✨ Design tip of the day: Dont be scared of scale!
         </Footer>
       </div>
     </main>
