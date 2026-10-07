@@ -19,18 +19,53 @@ export default function ThanksForAttending({
   const router = useRouter();
 
   const [displayed, setDisplayed] = useState(0);
+  const [phase, setPhase] = useState<"base" | "bonusIntro" | "bonus" | "done">("base");
   useEffect(() => {
-    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1200;
-    const start = performance.now();
+    const total = points + bonusPoints;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let cancelled = false;
     let raf = 0;
-    const tick = (now: number) => {
-      const t = duration ? Math.min((now - start) / duration, 1) : 1;
-      setDisplayed(Math.round((1 - (1 - t) ** 3) * points));
-      if (t < 1) raf = requestAnimationFrame(tick);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const countUp = (from: number, to: number, duration: number) =>
+      new Promise<void>((resolve) => {
+        const start = performance.now();
+        const tick = (now: number) => {
+          if (cancelled) return;
+          const t = duration ? Math.min((now - start) / duration, 1) : 1;
+          setDisplayed(Math.round(from + (1 - (1 - t) ** 3) * (to - from)));
+          if (t < 1) raf = requestAnimationFrame(tick);
+          else resolve();
+        };
+        raf = requestAnimationFrame(tick);
+      });
+
+    // Placeholder for the streak bonus animation — replace with the real one later.
+    const playBonusIntro = () =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, reduceMotion ? 0 : 2000);
+      });
+
+    (async () => {
+      await countUp(0, points, reduceMotion ? 0 : 1200);
+      if (cancelled) return;
+      if (bonusPoints <= 0) return setPhase("done");
+      setPhase("bonusIntro");
+      await playBonusIntro();
+      if (cancelled) return;
+      setPhase("bonus");
+      await countUp(points, total, reduceMotion ? 0 : 800);
+      if (cancelled) return;
+      setPhase("done");
+    })();
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [points]);
+  }, [points, bonusPoints]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black text-white">
@@ -45,17 +80,17 @@ export default function ThanksForAttending({
             <p className="font-sans text-[16px] leading-normal text-white/70">{eventName}</p>
           </div>
 
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-[16px]">
             <p className="font-sans text-[16px] leading-normal">You received:</p>
-            <div className="flex flex-col gap-[9px]">
-              <p className="font-plak text-[70px] font-bold leading-[1.2]">{displayed}</p>
-              <p className="font-sans text-[25px] leading-normal">points</p>
-              {bonusPoints > 0 && (
-                <p>
-                  +{bonusPoints} streak bonus · {streakCount}-event streak · {multiplier}x
+            <div className="flex flex-col py-[18px] bg-white">
+              <p className="font-plak text-[82px] text-black font-bold leading-[1]">{displayed}</p>
+              <p className="font-sans text-[24px] text-black leading-normal">points</p>
+            </div>
+              {bonusPoints > 0 && phase !== "base" && (
+                <p className="font-plak text-[20px] font-bold">
+                  x{multiplier} Streak Multiplier
                 </p>
               )}
-            </div>
           </div>
 
           <button
