@@ -49,9 +49,8 @@ export default function ThanksForAttending({
         timer = setTimeout(resolve, ms);
       });
 
-    // Wait for the multiplier letters to finish falling, plus a short hold.
-    const playBonusIntro = () =>
-      wait(reduceMotion ? 0 : fallingTextMs(multiplierText) + HOLD_MS);
+    // Wait for the multiplier text to slide in, plus a short hold.
+    const playBonusIntro = () => wait(reduceMotion ? 0 : SLIDE_MS + HOLD_MS);
 
     (async () => {
       if (bonusPoints > 0) {
@@ -78,12 +77,13 @@ export default function ThanksForAttending({
       cancelAnimationFrame(raf);
       clearTimeout(timer);
     };
-  }, [points, bonusPoints, multiplierText]);
+  }, [points, bonusPoints]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black text-white">
       <div
-        className="mx-auto flex w-full max-w-[393px] items-center justify-center py-10"
+        data-slide-clip
+        className="mx-auto flex w-full max-w-[393px] items-center justify-center overflow-x-clip py-10"
         style={{ minHeight: "max(100dvh, 680px)" }}
       >
         {/* Content group: arrows are positioned relative to this, so everything stays together */}
@@ -111,11 +111,11 @@ export default function ThanksForAttending({
               </div>
             </div>
             {/* Both panels share one grid cell, so the box keeps the taller one's height */}
-            <div className="relative z-10 grid py-[18px] bg-white">
+            <div className="grid py-[18px] bg-white">
               {bonusPoints > 0 && (
                 <div
                   aria-hidden={phase !== "context"}
-                  className={`col-start-1 row-start-1 transition-opacity duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-100" : "opacity-0"}`}
+                  className={`col-start-1 row-start-1 transition-opacity duration-[400ms] starting:opacity-0 motion-reduce:transition-none ${phase === "context" ? "opacity-100" : "opacity-0"}`}
                 >
                 <p className="font-plak text-[82px] text-black font-bold leading-[1]">{streakCount}</p>
                 <p className="font-sans text-[24px] text-black leading-normal">Events</p>
@@ -131,7 +131,7 @@ export default function ThanksForAttending({
               </div>
             </div>
               {bonusPoints > 0 && (
-                <FallingText
+                <SlideInText
                   className="font-plak text-[20px] font-bold"
                   text={multiplierText}
                   play={phase !== "context" && phase !== "base"}
@@ -165,19 +165,14 @@ export default function ThanksForAttending({
     </div>
   );
 }
-const CONTEXT_MS = 3000; // how long the streak context shows before fading to the points
+const CONTEXT_MS = 2000; // how long the streak context shows before fading to the points
 const FADE_MS = 400; // keep in sync with duration-[400ms] / delay-[400ms] on the panels
-const FALL_MS = 200;
-const STAGGER_MS = 20; // fixed delay between each letter's start
-const HOLD_MS = 300; // pause after the last letter settles, before the bonus count-up
-const START_OFFSET = "translate(0px, -48px)";
+const SLIDE_MS = 200;
+const HOLD_MS = 300; // pause after the text settles, before the bonus count-up
 
-const fallingTextMs = (text: string) =>
-  (Array.from(text).length - 1) * STAGGER_MS + FALL_MS;
-
-// Letters drop out from under the box above, one after another.
-// Rendered up front so its space is reserved; letters stay hidden under the box until `play`.
-function FallingText({
+// Slides in from the left as one piece, revealed as it crosses the capped column's edge ([data-slide-clip]).
+// Rendered up front so its space is reserved; parked off-screen until `play`.
+function SlideInText({
   text,
   className,
   play,
@@ -189,36 +184,26 @@ function FallingText({
   const ref = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    if (!play) return;
-    const letters = Array.from(ref.current?.querySelectorAll("span") ?? []);
+    const el = ref.current;
+    if (!play || !el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      letters.forEach((el) => (el.style.transform = "none"));
+      el.style.transform = "none";
       return;
     }
-    const anims = letters.map((el, i) =>
-      el.animate(
-        [
-          { transform: START_OFFSET, easing: "cubic-bezier(.5,0,1,1)" },
-          { transform: "translate(0px, 0px)" },
-        ],
-        { duration: FALL_MS, delay: i * STAGGER_MS, fill: "both" },
-      ),
+    // Start with the text's right edge exactly at the column's left edge, so it appears as soon as it moves.
+    const column = el.closest("[data-slide-clip]") ?? document.documentElement;
+    el.style.transform = "none";
+    const dx = el.getBoundingClientRect().right - column.getBoundingClientRect().left;
+    const anim = el.animate(
+      [{ transform: `translateX(${-dx}px)` }, { transform: "translateX(0)" }],
+      { duration: SLIDE_MS, easing: "cubic-bezier(.2,.8,.2,1)", fill: "both" },
     );
-    return () => anims.forEach((a) => a.cancel());
+    return () => anim.cancel();
   }, [text, play]);
 
   return (
-    <p ref={ref} className={className} aria-label={text}>
-      {Array.from(text).map((char, i) => (
-        <span
-          key={i}
-          aria-hidden
-          className="inline-block"
-          style={{ transform: START_OFFSET }}
-        >
-          {char === " " ? " " : char}
-        </span>
-      ))}
+    <p ref={ref} className={className} style={{ transform: "translateX(-100vw)" }}>
+      {text}
     </p>
   );
 }
