@@ -20,7 +20,9 @@ export default function ThanksForAttending({
   const multiplierText = `x${multiplier} STREAK MULTIPLIER`;
 
   const [displayed, setDisplayed] = useState(0);
-  const [phase, setPhase] = useState<"base" | "bonusIntro" | "bonus" | "done">("base");
+  const [phase, setPhase] = useState<"context" | "base" | "bonusIntro" | "bonus" | "done">(
+    bonusPoints > 0 ? "context" : "base",
+  );
   useEffect(() => {
     const total = points + bonusPoints;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,13 +44,23 @@ export default function ThanksForAttending({
         raf = requestAnimationFrame(tick);
       });
 
-    // Wait for the multiplier letters to finish falling, plus a short hold.
-    const playBonusIntro = () =>
+    const wait = (ms: number) =>
       new Promise<void>((resolve) => {
-        timer = setTimeout(resolve, reduceMotion ? 0 : fallingTextMs(multiplierText) + HOLD_MS);
+        timer = setTimeout(resolve, ms);
       });
 
+    // Wait for the multiplier letters to finish falling, plus a short hold.
+    const playBonusIntro = () =>
+      wait(reduceMotion ? 0 : fallingTextMs(multiplierText) + HOLD_MS);
+
     (async () => {
+      if (bonusPoints > 0) {
+        await wait(CONTEXT_MS);
+        if (cancelled) return;
+        setPhase("base"); // context fades out, then points fade in
+        await wait(reduceMotion ? 0 : FADE_MS * 2);
+        if (cancelled) return;
+      }
       await countUp(0, points, reduceMotion ? 0 : 1200);
       if (cancelled) return;
       if (bonusPoints <= 0) return setPhase("done");
@@ -82,16 +94,47 @@ export default function ThanksForAttending({
           </div>
 
           <div className="flex flex-col gap-[16px]">
-            <p className="font-sans text-[16px] leading-normal">You received:</p>
-            <div className="relative z-10 flex flex-col py-[18px] bg-white">
-              <p className="font-plak text-[82px] text-black font-bold leading-[1]">{displayed}</p>
-              <p className="font-sans text-[24px] text-black leading-normal">points</p>
+            <div className="grid">
+              {bonusPoints > 0 && (
+                <div
+                  aria-hidden={phase !== "context"}
+                  className={`col-start-1 row-start-1 transition-opacity duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-100" : "opacity-0"}`}
+                >
+                  <p className="font-sans text-[16px] leading-normal">You&apos;ve attended</p>
+                </div>
+              )}
+              <div
+                aria-hidden={phase === "context"}
+                className={`col-start-1 row-start-1 flex flex-col transition-opacity delay-[400ms] duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-0" : "opacity-100"}`}
+              >
+                {(<p className="font-sans text-[16px] leading-normal">You received:</p>)}
+              </div>
+            </div>
+            {/* Both panels share one grid cell, so the box keeps the taller one's height */}
+            <div className="relative z-10 grid py-[18px] bg-white">
+              {bonusPoints > 0 && (
+                <div
+                  aria-hidden={phase !== "context"}
+                  className={`col-start-1 row-start-1 transition-opacity duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-100" : "opacity-0"}`}
+                >
+                <p className="font-plak text-[82px] text-black font-bold leading-[1]">{streakCount}</p>
+                <p className="font-sans text-[24px] text-black leading-normal">Events</p>
+                </div>
+              )}
+              {/* Delayed by the fade duration so it only fades in after the context has faded out */}
+              <div
+                aria-hidden={phase === "context"}
+                className={`col-start-1 row-start-1 flex flex-col transition-opacity delay-[400ms] duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-0" : "opacity-100"}`}
+              >
+                <p className="font-plak text-[82px] text-black font-bold leading-[1]">{displayed}</p>
+                <p className="font-sans text-[24px] text-black leading-normal">points</p>
+              </div>
             </div>
               {bonusPoints > 0 && (
                 <FallingText
                   className="font-plak text-[20px] font-bold"
                   text={multiplierText}
-                  play={phase !== "base"}
+                  play={phase !== "context" && phase !== "base"}
                 />
               )}
           </div>
@@ -122,6 +165,8 @@ export default function ThanksForAttending({
     </div>
   );
 }
+const CONTEXT_MS = 3000; // how long the streak context shows before fading to the points
+const FADE_MS = 400; // keep in sync with duration-[400ms] / delay-[400ms] on the panels
 const FALL_MS = 200;
 const STAGGER_MS = 20; // fixed delay between each letter's start
 const HOLD_MS = 300; // pause after the last letter settles, before the bonus count-up
