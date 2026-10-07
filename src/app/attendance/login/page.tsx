@@ -1,6 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabaseClient'
+import DevPasswordLogin, { isLocalSupabaseDev } from '../e/[slug]/DevPasswordLogin'
 
 export default function AttendanceLoginPage() {
   async function handleGoogleLogin() {
@@ -42,6 +43,8 @@ export default function AttendanceLoginPage() {
           >
             Sign in with UCSD Google Account
           </button>
+
+          {isLocalSupabaseDev && <DevPasswordLogin redirectTo="/attendance/dashboard" />}
 
           <p className="mt-6 max-w-[220px] text-xs leading-relaxed text-white/60">
             Scanning in for an event? Use the QR code at the event instead.

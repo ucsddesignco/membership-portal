@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { isLocalSupabaseDev } from '../e/[slug]/DevPasswordLogin'
 
 export default function DashboardPage() {
   const [fullName, setFullName] = useState('')
@@ -17,7 +18,8 @@ export default function DashboardPage() {
         return
       }
 
-      if (!user.email?.endsWith('@ucsd.edu')) {
+      // Seeded local users use @test.dev emails
+      if (!isLocalSupabaseDev && !user.email?.endsWith('@ucsd.edu')) {
         await supabase.auth.signOut()
         window.location.href = '/attendance/login'
         return

@@ -9,7 +9,7 @@ export const isLocalSupabaseDev =
   process.env.NODE_ENV === 'development' &&
   /127\.0\.0\.1|localhost/.test(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '');
 
-export default function DevPasswordLogin() {
+export default function DevPasswordLogin({ redirectTo }: { redirectTo?: string }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -25,6 +25,11 @@ export default function DevPasswordLogin() {
     if (error) {
       setErrorMsg(error.message);
       setLoading(false);
+      return;
+    }
+
+    if (redirectTo) {
+      window.location.href = redirectTo;
       return;
     }
 
