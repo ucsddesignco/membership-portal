@@ -9,11 +9,9 @@ import { bonusFor, computeStreak, multiplierFor } from '@/lib/streak';
 export default function CheckinButton({
   eventId,
   eventSlug,
-  eventName,
 }: {
   eventId: string;
   eventSlug: string;
-  eventName: string;
 }) {
   const [user, setUser] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -169,7 +167,11 @@ export default function CheckinButton({
         bonusPoints={bonusPoints}
         streakCount={streakCount}
         multiplier={multiplierFor(streakCount)}
-        eventName={eventName}
+        firstName={
+          user.user_metadata.given_name ??
+          user.user_metadata.full_name?.split(' ')[0] ??
+          user.email
+        }
       />
     );
 

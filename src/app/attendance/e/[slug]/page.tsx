@@ -60,7 +60,7 @@ export default async function EventPage({
           </div>
 
           <div className="mt-4 w-full">
-            <CheckinButton eventId={event.id} eventSlug={slug} eventName={event.name} />
+            <CheckinButton eventId={event.id} eventSlug={slug} />
           </div>
         </div>
 
