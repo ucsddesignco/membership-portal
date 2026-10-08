@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import CheckinButton from './CheckinButton'
+import Footer from '../../Footer'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -60,15 +61,13 @@ export default async function EventPage({
           </div>
 
           <div className="mt-4 w-full">
-            <CheckinButton eventId={event.id} eventSlug={slug} eventName={event.name} />
+            <CheckinButton eventId={event.id} eventSlug={slug} />
           </div>
         </div>
 
-        <p className="text-center text-xs leading-relaxed text-neutral-400">
-          ✨ Design tip of the day:
-          <br />
-          Dont be scared of scale!
-        </p>
+        <Footer>
+          ✨ Design tip of the day: Dont be scared of scale!
+        </Footer>
       </div>
     </main>
   )
