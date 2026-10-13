@@ -84,7 +84,7 @@ export default function ThanksForAttending({
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black text-white">
       <div
         data-slide-clip
-        className="mx-auto flex w-full max-w-[393px] flex-col items-center gap-10 overflow-x-clip py-10"
+        className="mx-auto flex w-full max-w-[296px] flex-col items-center gap-10 overflow-x-clip py-10"
         style={{ minHeight: "max(100dvh, 680px)" }}
       >
         {/* Takes the leftover height so the content stays centered and the footer sits at the bottom */}
@@ -124,8 +124,8 @@ export default function ThanksForAttending({
                   aria-hidden={phase !== "context"}
                   className={`col-start-1 row-start-1 transition-opacity duration-[400ms] starting:opacity-0 motion-reduce:transition-none ${phase === "context" ? "opacity-100" : "opacity-0"}`}
                 >
-                <p className="font-plak text-[82px] text-black font-bold leading-[1]">{streakCount}</p>
-                <p className="font-sans text-[24px] text-black leading-normal">Events</p>
+                <p className="font-plak text-[80px] text-black font-bold leading-none">{streakCount}</p>
+                <p className="font-sans text-[24px] text-black leading-none">Events</p>
                 </div>
               )}
               {/* Delayed by the fade duration so it only fades in after the context has faded out */}
@@ -133,8 +133,8 @@ export default function ThanksForAttending({
                 aria-hidden={phase === "context"}
                 className={`col-start-1 row-start-1 flex flex-col transition-opacity delay-[400ms] duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-0" : "opacity-100"}`}
               >
-                <p className="font-plak text-[82px] text-black font-bold leading-[1]">{displayed}</p>
-                <p className="font-sans text-[24px] text-black leading-normal">points</p>
+                <p className="font-plak text-[80px] text-black font-bold leading-none">{displayed}</p>
+                <p className="font-sans text-[24px] text-black leading-none">points</p>
               </div>
             </div>
 
