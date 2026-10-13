@@ -1,6 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabaseClient'
+import Footer from '../attendance/Footer'
 
 export default function AttendanceLoginPage() {
   async function handleGoogleLogin() {
@@ -58,9 +59,7 @@ export default function AttendanceLoginPage() {
           </p>
         </section>
 
-        <p className="max-w-[170px] text-center text-[11px] leading-snug">
-          Exchange points for merchandise in the future!
-        </p>
+        <Footer>Exchange points for merchandise in the future!</Footer>
       </div>
     </main>
   );
