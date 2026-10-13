@@ -1,5 +1,6 @@
 'use client';
 
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useState } from 'react';
 import ThanksForAttending from './ThanksForAttending';
@@ -13,7 +14,7 @@ export default function CheckinButton({
   eventId: string;
   eventSlug: string;
 }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>(
     'idle',
@@ -70,6 +71,7 @@ export default function CheckinButton({
   }
 
   async function handleCheckin() {
+    if (!user) return;
     setStatus('loading');
 
     const { data: event } = await supabase
@@ -168,9 +170,9 @@ export default function CheckinButton({
         streakCount={streakCount}
         multiplier={multiplierFor(streakCount)}
         firstName={
-          user.user_metadata.given_name ??
-          user.user_metadata.full_name?.split(' ')[0] ??
-          user.email
+          user?.user_metadata.given_name ??
+          user?.user_metadata.full_name?.split(' ')[0] ??
+          user?.email
         }
       />
     );

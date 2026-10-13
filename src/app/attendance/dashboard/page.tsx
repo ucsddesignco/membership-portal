@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [totalPoints, setTotalPoints] = useState<number | null>(null)
   const [eventsAttended, setEventsAttended] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [displayedPoints, setDisplayedPoints] = useState(0)
 
   useEffect(() => {
     async function init() {
@@ -55,6 +56,22 @@ export default function DashboardPage() {
     init()
   }, [])
 
+  // Same ease-out count-up as ThanksForAttending
+  useEffect(() => {
+    if (totalPoints === null) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const duration = reduceMotion ? 0 : 1200
+    const start = performance.now()
+    let raf = 0
+    const tick = (now: number) => {
+      const t = duration ? Math.min((now - start) / duration, 1) : 1
+      setDisplayedPoints(Math.round((1 - (1 - t) ** 3) * totalPoints))
+      if (t < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [totalPoints])
+
   if (loading) {
     return (
       <main className="min-h-dvh bg-black text-white">
@@ -90,7 +107,7 @@ export default function DashboardPage() {
               <div className="flex flex-col">
                 <p className="text-[16px]">You have:</p>
                 <div className="flex flex-col gap-[9px]">
-                  <p className="font-plak text-[65px] font-bold leading-[1.2]">{totalPoints}</p>
+                  <p className="font-plak text-[65px] font-bold leading-[1.2]">{displayedPoints}</p>
                   <p className="text-[16px] leading-none">points total</p>
                 </div>
               </div>
