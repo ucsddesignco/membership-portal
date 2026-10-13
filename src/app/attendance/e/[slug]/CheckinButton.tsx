@@ -103,7 +103,7 @@ export default function CheckinButton({
     if (event.counts_toward_streak) {
       let streakEventsQuery = supabase
         .from('events')
-        .select('id, active_start, counts_toward_streak')
+        .select('id, active_start, active_end, counts_toward_streak')
         .eq('counts_toward_streak', true);
       if (event.active_start) {
         streakEventsQuery = streakEventsQuery.lt(
@@ -131,6 +131,7 @@ export default function CheckinButton({
         event,
         streakEvents ?? [],
         (userCheckins ?? []).map((c) => c.event_id),
+        now,
       );
       bonus = bonusFor(event.points, streak);
     }

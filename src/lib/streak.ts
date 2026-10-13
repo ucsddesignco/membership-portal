@@ -1,6 +1,7 @@
 export type StreakEvent = {
   id: string;
   active_start: string | null;
+  active_end: string | null;
   counts_toward_streak: boolean;
 };
 
@@ -13,6 +14,7 @@ export function computeStreak(
   currentEvent: StreakEvent,
   streakEvents: StreakEvent[],
   attendedEventIds: Iterable<string>,
+  now: Date,
 ): number {
   if (!currentEvent.counts_toward_streak) return 0;
 
@@ -36,8 +38,15 @@ export function computeStreak(
 
   let streak = 0;
   for (const e of prior) {
-    if (!attended.has(e.id)) break;
-    streak++;
+    if (attended.has(e.id)) {
+      streak++;
+      continue;
+    }
+    // A missed event only breaks the streak once it has ended
+    const ended =
+      e.active_end !== null &&
+      new Date(e.active_end).getTime() <= now.getTime();
+    if (ended) break;
   }
   return streak + 1;
 }
