@@ -66,7 +66,8 @@ export default async function EventPage({
         </div>
 
         <Footer>
-          ✨ Design tip of the day: Dont be scared of scale!
+          ✨ Design tip of the day: <br/>
+          Use Option key to measure in Figma!
         </Footer>
       </div>
     </main>
