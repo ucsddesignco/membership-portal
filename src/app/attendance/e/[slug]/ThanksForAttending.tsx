@@ -106,7 +106,7 @@ export default function ThanksForAttending({
                   aria-hidden={phase !== "context"}
                   className={`col-start-1 row-start-1 transition-opacity duration-[400ms] motion-reduce:transition-none ${phase === "context" ? "opacity-100" : "opacity-0"}`}
                 >
-                  <p className="font-sans text-[16px] leading-normal">You&apos;ve attended</p>
+                  <p className="font-sans text-[16px] leading-normal">Your streak:</p>
                 </div>
               )}
               <div
