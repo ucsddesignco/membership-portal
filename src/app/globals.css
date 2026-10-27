@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-neue-plak-extended), ui-sans-serif, system-ui, sans-serif;
   --font-plak: var(--font-neue-plak-extended), ui-sans-serif, system-ui, sans-serif;
+  --font-nb: var(--font-nb-international), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
