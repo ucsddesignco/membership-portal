@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import Footer from '../Footer'
-import DevPasswordLogin, { isLocalSupabaseDev } from '../e/[slug]/DevPasswordLogin'
+import DevPasswordLogin, { isLocalSupabaseDev } from '../DevPasswordLogin'
 
 export default function AttendanceLoginPage() {
   async function handleGoogleLogin() {
