@@ -13,7 +13,6 @@ export default async function EventPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const isMock = slug == 'demo'
 
   const { data: event, error } = await supabase
     .from('events')
