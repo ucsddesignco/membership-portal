@@ -12,6 +12,7 @@ type EventItem = {
   description: string | null
   feedback_url: string | null
   attended: boolean
+  upcoming: boolean // not attended, and check-in hasn't closed yet
   earned: number
 }
 
@@ -42,7 +43,7 @@ export default function EventList() {
       const [{ data: eventRows }, { data: checkins }] = await Promise.all([
         supabase
           .from('events')
-          .select('id, name, thumbnail_url, event_date, description, feedback_url')
+          .select('id, name, thumbnail_url, event_date, active_end, description, feedback_url')
           .lte('event_date', today)
           .order('event_date', { ascending: false }),
         supabase
@@ -56,12 +57,17 @@ export default function EventList() {
         checkins?.map((row) => [row.event_id, row.points_awarded + row.bonus_points]),
       )
 
+      const now = Date.now()
       setEvents(
-        eventRows?.map((event) => ({
-          ...event,
-          attended: earnedByEvent.has(event.id),
-          earned: earnedByEvent.get(event.id) ?? 0,
-        })) ?? [],
+        eventRows?.map(({ active_end, ...event }) => {
+          const attended = earnedByEvent.has(event.id)
+          return {
+            ...event,
+            attended,
+            upcoming: !attended && !!active_end && new Date(active_end).getTime() > now,
+            earned: earnedByEvent.get(event.id) ?? 0,
+          }
+        }) ?? [],
       )
     }
 
@@ -137,7 +143,7 @@ function EventRow({
               />
             </span>
             <span className="text-[10px] leading-[10px] text-white/70">
-              {event.attended ? `+${event.earned} pts` : 'Missed'}
+              {event.attended ? `+${event.earned} pts` : event.upcoming ? 'Upcoming' : 'Missed'}
             </span>
           </span>
         </button>
