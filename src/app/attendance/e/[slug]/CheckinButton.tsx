@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useState } from 'react';
 import ThanksForAttending from './ThanksForAttending';
-import DevPasswordLogin, { isLocalSupabaseDev } from './DevPasswordLogin';
+import DevPasswordLogin, { isLocalSupabaseDev } from '../../DevPasswordLogin';
 import { bonusFor, computeStreak, multiplierFor } from '@/lib/streak';
 
 export default function CheckinButton({

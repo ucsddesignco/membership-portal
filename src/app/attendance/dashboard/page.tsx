@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Footer from '../Footer'
-import { isLocalSupabaseDev } from '../e/[slug]/DevPasswordLogin'
+import { isLocalSupabaseDev } from '../DevPasswordLogin'
 
 export default function DashboardPage() {
   const [fullName, setFullName] = useState('')
