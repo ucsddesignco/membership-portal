@@ -1,16 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { isLocalSupabaseDev } from '../attendance/e/[slug]/DevPasswordLogin'
 
 type EventItem = {
   id: string
+  slug: string
   name: string
   thumbnail_url: string | null
   event_date: string // YYYY-MM-DD
   description: string | null
-  feedback_url: string | null
   attended: boolean
   upcoming: boolean // not attended, and check-in hasn't closed yet
   earned: number
@@ -43,7 +44,7 @@ export default function EventList() {
       const [{ data: eventRows }, { data: checkins }] = await Promise.all([
         supabase
           .from('events')
-          .select('id, name, thumbnail_url, event_date, active_end, description, feedback_url')
+          .select('id, slug, name, thumbnail_url, event_date, active_end, description')
           .lte('event_date', today)
           .order('event_date', { ascending: false }),
         supabase
@@ -148,15 +149,13 @@ function EventRow({
           </span>
         </button>
 
-        {event.attended && event.feedback_url && (
-          <a
-            href={event.feedback_url}
-            target="_blank"
-            rel="noopener noreferrer"
+        {event.attended && (
+          <Link
+            href={`/events/${event.slug}/feedback`}
             className="flex h-[30px] shrink-0 items-center justify-center bg-white px-3 text-[13px] leading-none text-black hover:bg-neutral-200"
           >
             Feedback
-          </a>
+          </Link>
         )}
       </div>
 
