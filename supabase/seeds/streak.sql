@@ -42,3 +42,27 @@ select '00000000-0000-0000-0000-0000000000b2', e.id, 100, e.active_start + inter
 from public.events e
 where e.slug in ('intro-to-design-26', 'slime-social-26', 'camp-dco-day1-26')
 on conflict (user_id, event_id) do nothing;
+
+-- The fixtures above change everyone's streaks, so recompute streak_count and bonus_points.
+-- Same statement as in seed.sql; keep the two in sync.
+
+with ranked as (
+  select id, points, row_number() over (order by active_start) as rn
+  from public.events
+  where counts_toward_streak
+),
+runs as (
+  select c.id, r.points,
+    r.rn - coalesce((
+      select max(m.rn) from ranked m
+      where m.rn < r.rn
+        and not exists (select 1 from public.checkins x where x.user_id = c.user_id and x.event_id = m.id)
+    ), 0) as streak
+  from public.checkins c
+  join ranked r on r.id = c.event_id
+)
+update public.checkins c
+set streak_count = runs.streak,
+    bonus_points = round(runs.points * (round(least(1 + 0.2 * (runs.streak - 1), 2), 1) - 1))
+from runs
+where runs.id = c.id;

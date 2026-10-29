@@ -123,17 +123,43 @@ insert into public.events (id, slug, name, points, thumbnail_url, event_date, ac
    '2026-10-28', '2026-10-29T01:30:00+00:00', '2026-10-29T03:00:00+00:00', true,
    'Day two of Camp DCo, our hands-on workshop series. Keep building on what you started on day one.');
 
--- A: attended all but Fall Kickoff, with a streak bonus at Camp DCo. B: only Fall Kickoff. C: none.
+-- A: attended all but Fall Kickoff, a 3-event streak by Camp DCo Day 1. B: only Fall Kickoff. C: none.
 
-insert into public.checkins (user_id, event_id, points_awarded, bonus_points, checked_in_at)
-select u.id, e.id, 100, u.bonus, e.active_start + interval '15 minutes'
+insert into public.checkins (user_id, event_id, points_awarded, checked_in_at)
+select u.id, e.id, e.points, e.active_start + interval '15 minutes'
 from (values
-  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'intro-to-design-26', 0),
-  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'slime-social-26', 0),
-  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'camp-dco-day1-26', 50),
-  ('00000000-0000-0000-0000-0000000000b2'::uuid, 'fall-kickoff-26', 0)
-) as u(id, slug, bonus)
+  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'intro-to-design-26'),
+  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'slime-social-26'),
+  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'camp-dco-day1-26'),
+  ('00000000-0000-0000-0000-0000000000b2'::uuid, 'fall-kickoff-26')
+) as u(id, slug)
 join public.events e on e.slug = u.slug;
+
+-- Fill in streak_count and bonus_points the way check-in does (src/lib/streak.ts): the streak is
+-- the run of attended streak events ending at this one, and the bonus is +20% per extra event,
+-- capped at 2x. Every seeded check-in comes after earlier events ended, so any miss breaks it.
+-- Keep in sync with the copy at the end of seeds/streak.sql.
+
+with ranked as (
+  select id, points, row_number() over (order by active_start) as rn
+  from public.events
+  where counts_toward_streak
+),
+runs as (
+  select c.id, r.points,
+    r.rn - coalesce((
+      select max(m.rn) from ranked m
+      where m.rn < r.rn
+        and not exists (select 1 from public.checkins x where x.user_id = c.user_id and x.event_id = m.id)
+    ), 0) as streak
+  from public.checkins c
+  join ranked r on r.id = c.event_id
+)
+update public.checkins c
+set streak_count = runs.streak,
+    bonus_points = round(runs.points * (round(least(1 + 0.2 * (runs.streak - 1), 2), 1) - 1))
+from runs
+where runs.id = c.id;
 
 update public.events set category = 'GBM' where slug in ('fall-kickoff-26', 'intro-to-design-26');
 update public.events set category = 'Social' where slug = 'slime-social-26';
