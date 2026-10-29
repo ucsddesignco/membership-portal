@@ -59,9 +59,13 @@ insert into public.events (id, slug, name, points, thumbnail_url, event_date, ac
    '2026-10-14', '2026-10-15T01:30:00+00:00', '2026-10-15T02:45:00+00:00', true,
    'Take a break and make some slime with fellow designers. Snacks, music, and good company provided.'),
   ('90e863be-9413-4967-a485-f7861d29f183', 'camp-dco-day1-26', 'Camp DCo Day 1', 100,
-   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/camp-dco-day1-26.png',
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/camp-dco-26.png',
    '2026-10-21', '2026-10-22T01:00:00+00:00', '2026-10-22T03:00:00+00:00', true,
-   'Day one of Camp DCo, our hands-on workshop series. Bring a laptop and an idea.');
+   'Day one of Camp DCo, our hands-on workshop series. Bring a laptop and an idea.'),
+  ('00525bc0-9b6e-4e90-a042-5da74ab15a58', 'camp-dco-day2-26', 'Camp DCo Day 2', 100,
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/camp-dco-26.png',
+   '2026-10-28', '2026-10-29T01:30:00+00:00', '2026-10-29T03:00:00+00:00', true,
+   'Day two of Camp DCo, our hands-on workshop series. Keep building on what you started on day one.');
 
 -- A: attended all but Fall Kickoff, with a streak bonus at Camp DCo. B: only Fall Kickoff. C: none.
 
