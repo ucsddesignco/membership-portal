@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { ChevronIcon } from '../icons'
+import { CheckIcon, ChevronIcon } from '../icons'
 import { isLocalSupabaseDev } from '../attendance/e/[slug]/DevPasswordLogin'
 
 type EventItem = {
@@ -16,12 +17,22 @@ type EventItem = {
   attended: boolean
   upcoming: boolean // not attended, and check-in hasn't closed yet
   earned: number
+  feedbackSent: boolean
 }
 
 export default function EventList() {
   const [events, setEvents] = useState<EventItem[] | null>(null)
   // Only one row is expanded at a time
   const [openId, setOpenId] = useState<string | null>(null)
+  // Set by the feedback form on submit; plays the +20pts animation once on that row
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [justSent, setJustSent] = useState(() => searchParams.get('sent'))
+
+  // Drop ?sent from the URL so a refresh doesn't replay the animation
+  useEffect(() => {
+    if (searchParams.has('sent')) router.replace('/events', { scroll: false })
+  }, [searchParams, router])
 
   useEffect(() => {
     async function init() {
@@ -42,7 +53,7 @@ export default function EventList() {
       // YYYY-MM-DD in San Diego time, comparable with event_date
       const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
 
-      const [{ data: eventRows }, { data: checkins }] = await Promise.all([
+      const [{ data: eventRows }, { data: checkins }, { data: feedback }] = await Promise.all([
         supabase
           .from('events')
           .select('id, slug, name, thumbnail_url, event_date, active_end, description')
@@ -52,12 +63,15 @@ export default function EventList() {
           .from('checkins')
           .select('event_id, points_awarded, bonus_points')
           .eq('user_id', user.id),
+        supabase.from('feedback').select('event_id').eq('user_id', user.id),
       ])
 
       // Same total as the dashboard: base points plus any streak bonus
       const earnedByEvent = new Map(
         checkins?.map((row) => [row.event_id, row.points_awarded + row.bonus_points]),
       )
+
+      const sentEvents = new Set(feedback?.map((row) => row.event_id))
 
       const now = Date.now()
       setEvents(
@@ -68,6 +82,7 @@ export default function EventList() {
             attended,
             upcoming: !attended && !!active_end && new Date(active_end).getTime() > now,
             earned: earnedByEvent.get(event.id) ?? 0,
+            feedbackSent: sentEvents.has(event.id),
           }
         }) ?? [],
       )
@@ -89,6 +104,8 @@ export default function EventList() {
           first={i === 0}
           open={openId === event.id}
           onToggle={() => setOpenId(openId === event.id ? null : event.id)}
+          justSent={justSent === event.slug}
+          onSentAnimationEnd={() => setJustSent(null)}
         />
       ))}
     </ul>
@@ -100,11 +117,15 @@ function EventRow({
   first,
   open,
   onToggle,
+  justSent,
+  onSentAnimationEnd,
 }: {
   event: EventItem
   first: boolean
   open: boolean
   onToggle: () => void
+  justSent: boolean
+  onSentAnimationEnd: () => void
 }) {
   const panelId = `event-panel-${event.id}`
   // event_date is date-only, which parses as UTC midnight
@@ -145,7 +166,23 @@ function EventRow({
           </span>
         </button>
 
-        {event.attended && (
+        {event.attended && event.feedbackSent && (
+          <span className="relative flex h-[30px] shrink-0 items-center gap-[5.5px] border border-white px-3 text-[13px] leading-[14px]">
+            Sent
+            <CheckIcon className="block" />
+            {justSent && (
+              <span
+                aria-live="polite"
+                onAnimationEnd={onSentAnimationEnd}
+                className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 pb-1 text-[12px] leading-none whitespace-nowrap animate-float-fade motion-reduce:animate-fade-out"
+              >
+                +20pts
+              </span>
+            )}
+          </span>
+        )}
+
+        {event.attended && !event.feedbackSent && (
           <Link
             href={`/events/${event.slug}/feedback`}
             className="flex h-[30px] shrink-0 items-center justify-center bg-white px-3 text-[13px] leading-none text-black hover:bg-neutral-200"

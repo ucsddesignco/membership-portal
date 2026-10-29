@@ -13,6 +13,23 @@
   --font-nb: var(--font-nb-international), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* "+20pts" that drifts up and fades after sending feedback. Tweak timing and distance here. */
+@theme {
+  --animate-float-fade: float-fade 1.2s ease-out forwards;
+  --animate-fade-out: fade-out 1.2s ease-out forwards;
+
+  @keyframes float-fade {
+    0% { opacity: 0; transform: translateY(4px); }
+    15% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-16px); }
+  }
+
+  @keyframes fade-out {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

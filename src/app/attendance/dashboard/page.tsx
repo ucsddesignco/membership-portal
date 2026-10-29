@@ -41,13 +41,18 @@ export default function DashboardPage() {
         full_name: user.user_metadata.full_name ?? user.email,
       })
 
-      const { data: checkins } = await supabase
-        .from('checkins')
-        .select('points_awarded, bonus_points')
-        .eq('user_id', user.id)
+      const [{ data: checkins }, { data: feedback }] = await Promise.all([
+        supabase
+          .from('checkins')
+          .select('points_awarded, bonus_points')
+          .eq('user_id', user.id),
+        supabase.from('feedback').select('points_awarded').eq('user_id', user.id),
+      ])
 
+      // Attendance points, streak bonuses, and points for sending event feedback
       const total =
-        checkins?.reduce((sum, row) => sum + row.points_awarded + row.bonus_points, 0) ?? 0
+        (checkins?.reduce((sum, row) => sum + row.points_awarded + row.bonus_points, 0) ?? 0) +
+        (feedback?.reduce((sum, row) => sum + row.points_awarded, 0) ?? 0)
       setTotalPoints(total)
       setEventsAttended(checkins?.length ?? 0)
       setLoading(false)

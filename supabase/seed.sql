@@ -6,6 +6,62 @@ alter table events add column if not exists counts_toward_streak boolean not nul
 alter table checkins add column if not exists bonus_points integer not null default 0;
 alter table checkins add column if not exists streak_count integer not null default 0;
 alter table events add column if not exists description text;
+alter table events add column if not exists category text;
+
+-- Event feedback: one per attendee per event, not editable, worth a flat 20 points
+
+create table if not exists public.feedback (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id),
+  event_id uuid not null references public.events(id) on delete restrict,
+  rating smallint not null check (rating between 1 and 5),
+  liked text not null check (length(btrim(liked)) between 1 and 2000),
+  improve text not null check (length(btrim(improve)) between 1 and 2000),
+  would_return boolean not null,
+  suggestions text check (suggestions is null or length(suggestions) <= 2000),
+  points_awarded integer not null default 20 check (points_awarded = 20),
+  created_at timestamptz not null default now(),
+  unique (user_id, event_id)
+);
+
+alter table public.feedback enable row level security;
+
+-- No update/delete policies, so submitted feedback can't be edited
+drop policy if exists "insert own feedback for attended events" on public.feedback;
+create policy "insert own feedback for attended events" on public.feedback for insert
+  with check (auth.uid() = user_id and exists (
+    select 1 from public.checkins c where c.user_id = auth.uid() and c.event_id = feedback.event_id));
+
+drop policy if exists "select own feedback" on public.feedback;
+create policy "select own feedback" on public.feedback for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "admins read all feedback" on public.feedback;
+create policy "admins read all feedback" on public.feedback for select
+  using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin));
+
+-- Anonymous views for exporting to Google Sheets from the SQL editor. security_invoker plus the
+-- revoke keeps them from exposing everyone's feedback through the API.
+
+create or replace view public.feedback_export with (security_invoker = true) as
+select e.event_date as "Date", e.name as "Event", e.category as "Type",
+       f.rating as "Rating (1-5)",
+       case when f.would_return then 'Yes' else 'No' end as "Would come again",
+       f.liked as "Liked", f.improve as "Could be better",
+       coalesce(f.suggestions, '') as "Suggestions",
+       f.created_at as "Submitted at"
+from public.feedback f join public.events e on e.id = f.event_id
+order by e.event_date desc, f.created_at;
+
+create or replace view public.feedback_summary with (security_invoker = true) as
+select e.event_date as "Date", e.name as "Event", count(*) as "Responses",
+       round(avg(f.rating), 2) as "Avg rating",
+       round(100.0 * avg(f.would_return::int), 0) as "% would come again"
+from public.feedback f join public.events e on e.id = f.event_id
+group by e.id, e.event_date, e.name
+order by e.event_date desc;
+
+revoke all on public.feedback_export, public.feedback_summary from anon, authenticated;
 
 -- Users (password: password123)
 
@@ -78,3 +134,16 @@ from (values
   ('00000000-0000-0000-0000-0000000000b2'::uuid, 'fall-kickoff-26', 0)
 ) as u(id, slug, bonus)
 join public.events e on e.slug = u.slug;
+
+update public.events set category = 'GBM' where slug in ('fall-kickoff-26', 'intro-to-design-26');
+update public.events set category = 'Social' where slug = 'slime-social-26';
+update public.events set category = 'Workshop' where slug in ('camp-dco-day1-26', 'camp-dco-day2-26');
+
+-- A already sent feedback for Intro to Design, so the Sent state shows without submitting
+
+insert into public.feedback (user_id, event_id, rating, liked, improve, would_return, suggestions)
+select '00000000-0000-0000-0000-0000000000a1', id, 4,
+  'Clear intro to the fundamentals, and the examples were fun.',
+  'It ran a little long. A short break halfway through would help.',
+  true, 'More hands-on mini exercises.'
+from public.events where slug = 'intro-to-design-26';
