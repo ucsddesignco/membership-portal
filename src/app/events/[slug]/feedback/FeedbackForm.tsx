@@ -133,15 +133,15 @@ export default function FeedbackForm({ event }: { event: FeedbackEvent }) {
 
       <div className="flex flex-col gap-5">
         <fieldset>
-          <legend className="text-[18px]">On a scale of 1 to 5, how was it?</legend>
+          <legend className="text-[18px]">On a scale of 1 to 5, how was it? *</legend>
           <RatingInput value={rating} onChange={setRating} />
         </fieldset>
 
-        <TextQuestion id="liked" label="What did you like?" value={liked} onChange={setLiked} height="h-[170px]" required />
-        <TextQuestion id="improve" label="What could be better?" value={improve} onChange={setImprove} height="h-[170px]" required />
+        <TextQuestion id="liked" label="What did you like? *" value={liked} onChange={setLiked} height="h-[170px]" required />
+        <TextQuestion id="improve" label="What could be better? *" value={improve} onChange={setImprove} height="h-[170px]" required />
 
         <fieldset>
-          <legend className="mb-[10px] text-[18px]">Would you come to similar events?</legend>
+          <legend className="mb-[10px] text-[18px]">Would you come to similar events? * </legend>
           <div className="flex gap-8">
             {[true, false].map((option) => (
               <button
@@ -171,7 +171,7 @@ export default function FeedbackForm({ event }: { event: FeedbackEvent }) {
         <button
           type="submit"
           disabled={!complete || status === 'loading'}
-          className="cursor-pointer bg-white py-4 text-[13px] text-black hover:bg-neutral-200 disabled:cursor-not-allowed disabled:bg-white/50"
+          className="cursor-pointer border border-transparent bg-white py-4 text-[13px] text-black enabled:hover:bg-neutral-200 disabled:cursor-not-allowed disabled:border-white disabled:bg-black disabled:text-white"
         >
           {status === 'loading' ? 'Sending...' : 'Submit Feedback'}
         </button>
