@@ -115,7 +115,7 @@ export default function FeedbackForm({ event }: { event: FeedbackEvent }) {
           alt={event.name}
           className="block h-[163px] w-[131px] shrink-0 border border-white object-cover"
         />
-        <div className="flex min-h-[164px] min-w-0 flex-1 flex-col justify-center gap-[3px]">
+        <div className="flex min-h-[164px] min-w-0 flex-1 flex-col gap-[3px]">
           <div className="flex flex-col items-start">
             {event.category && (
               <span className="flex h-[14px] items-center border-[0.882px] border-white px-2 text-[8.815px] leading-[12.342px]">
