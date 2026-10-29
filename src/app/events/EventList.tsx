@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
+import { ChevronIcon } from '../icons'
 import { isLocalSupabaseDev } from '../attendance/e/[slug]/DevPasswordLogin'
 
 type EventItem = {
@@ -133,13 +134,8 @@ function EventRow({
           <span className="flex min-w-0 flex-col gap-[2px]">
             <span className="flex items-center gap-2">
               <span className={`truncate text-[18px] leading-[18px] ${text}`}>{event.name}</span>
-              {/* The asset points left; rotate to point down when closed, up when open */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/chevron.svg"
-                alt=""
-                width={7.07781}
-                height={11.7372}
+              {/* The icon points left; rotate to point down when closed, up when open */}
+              <ChevronIcon
                 className={`block shrink-0 transition-transform duration-200 motion-reduce:transition-none ${open ? 'rotate-90' : '-rotate-90'} ${event.attended ? '' : 'opacity-70'}`}
               />
             </span>
