@@ -115,17 +115,19 @@ export default function FeedbackForm({ event }: { event: FeedbackEvent }) {
           alt={event.name}
           className="block h-[163px] w-[131px] shrink-0 border border-white object-cover"
         />
-        <div className="flex min-h-[164px] min-w-0 flex-1 flex-col gap-[3px]">
-          <div className="flex flex-col items-start">
+        <div className="flex min-h-[164px] min-w-0 flex-1 flex-col gap-1">
+          <div className="flex flex-col items-start gap-2">
             {event.category && (
               <span className="flex h-[14px] items-center border-[0.882px] border-white px-2 text-[8.815px] leading-[12.342px]">
                 {event.category}
               </span>
             )}
-            <h1 className="font-plak text-[20px] font-bold">{event.name}</h1>
+            <h1 className="font-plak text-[20px] leading-none font-bold">{event.name}</h1>
           </div>
-          <p className="min-h-[28px] text-[12px] leading-[14px]">You earned {earned}pts for attending.</p>
-          {event.description && <p className="text-[12px] leading-[12px]">{event.description}</p>}
+          <div className="flex flex-col gap-2">
+            <p className="text-[12px] leading-[14px]">You earned {earned}pts for attending.</p>
+            {event.description && <p className="text-[12px] leading-[12px]">{event.description}</p>}
+          </div>
         </div>
       </div>
 
