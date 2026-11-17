@@ -25,7 +25,7 @@ export default async function FeedbackPage({
   return (
     <main className="min-h-dvh bg-black font-nb text-white">
       <Header />
-      <div className="mx-auto flex w-full max-w-[329px] flex-col gap-5 pt-5 pb-8">
+      <div data-menu-dims className="mx-auto flex w-full max-w-[329px] flex-col gap-5 pt-5 pb-8">
         <Link href="/events" className="flex items-center gap-2 self-start py-[10px] text-[12px] leading-[14px]">
           <BackIcon className="block" />
           Back
