@@ -149,8 +149,8 @@ export default function FeedbackForm({ event }: { event: FeedbackEvent }) {
                 type="button"
                 aria-pressed={wouldReturn === option}
                 onClick={() => setWouldReturn(option)}
-                // A 70% fill reads as "pressed" against the plain white option
-                className={`flex-1 cursor-pointer py-4 text-[12px] leading-[14px] text-black ${wouldReturn === option ? 'bg-white/70' : 'bg-white hover:bg-neutral-200'}`}
+                // Options start at a 70% fill and go solid white when pressed
+                className={`flex-1 cursor-pointer py-4 text-[12px] leading-[14px] text-black ${wouldReturn === option ? 'bg-white' : 'bg-white/70 hover:bg-white/85'}`}
               >
                 {option ? 'Yes' : 'No'}
               </button>
@@ -171,7 +171,7 @@ export default function FeedbackForm({ event }: { event: FeedbackEvent }) {
         <button
           type="submit"
           disabled={!complete || status === 'loading'}
-          className="cursor-pointer border border-transparent bg-white py-4 text-[13px] text-black enabled:hover:bg-neutral-200 disabled:cursor-not-allowed disabled:border-white disabled:bg-black disabled:text-white"
+          className="cursor-pointer bg-white py-4 text-[13px] text-black enabled:hover:bg-neutral-200 disabled:cursor-not-allowed disabled:bg-white/70"
         >
           {status === 'loading' ? 'Sending...' : 'Submit Feedback'}
         </button>
