@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import type { PortalPanelProps } from '../(portal)/portalPages'
 import { CheckIcon, ChevronIcon } from '../icons'
-import { isLocalSupabaseDev } from '../attendance/e/[slug]/DevPasswordLogin'
 
 type EventItem = {
   id: string
@@ -20,7 +20,22 @@ type EventItem = {
   feedbackSent: boolean
 }
 
-export default function EventList() {
+export default function EventsPanel({ user, active }: PortalPanelProps) {
+  return (
+    <div className="mx-auto mt-8 w-full max-w-[329px] pb-10 font-nb">
+      {/* EventList reads ?sent=, which needs a Suspense boundary to prerender */}
+      <Suspense fallback={<p className="py-16 text-center text-xs">Loading...</p>}>
+        <EventList user={user} active={active} />
+      </Suspense>
+    </div>
+  )
+}
+
+function EventList({ user, active }: PortalPanelProps) {
+  // Flyers wait until this page is first on screen, so a Dashboard visit doesn't download them all.
+  // loading="lazy" doesn't help: collapsed rows still count as visible to the browser.
+  const [seen, setSeen] = useState(active)
+  if (active && !seen) setSeen(true)
   const [events, setEvents] = useState<EventItem[] | null>(null)
   // Only one row is expanded at a time
   const [openId, setOpenId] = useState<string | null>(null)
@@ -35,21 +50,10 @@ export default function EventList() {
   }, [searchParams, router])
 
   useEffect(() => {
+    if (!user) return
+    const userId = user.id
+
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        window.location.href = '/attendance/login'
-        return
-      }
-
-      // Seeded local users use @test.dev emails
-      if (!isLocalSupabaseDev && !user.email?.endsWith('@ucsd.edu')) {
-        await supabase.auth.signOut()
-        window.location.href = '/attendance/login'
-        return
-      }
-
       // YYYY-MM-DD in San Diego time, comparable with event_date
       const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
 
@@ -62,8 +66,8 @@ export default function EventList() {
         supabase
           .from('checkins')
           .select('event_id, points_awarded, bonus_points')
-          .eq('user_id', user.id),
-        supabase.from('feedback').select('event_id').eq('user_id', user.id),
+          .eq('user_id', userId),
+        supabase.from('feedback').select('event_id').eq('user_id', userId),
       ])
 
       // Same total as the dashboard: base points plus any streak bonus
@@ -89,7 +93,7 @@ export default function EventList() {
     }
 
     init()
-  }, [])
+  }, [user])
 
   if (!events) {
     return <p className="py-16 text-center text-xs">Loading...</p>
@@ -106,6 +110,7 @@ export default function EventList() {
           onToggle={() => setOpenId(openId === event.id ? null : event.id)}
           justSent={justSent === event.slug}
           onSentAnimationEnd={() => setJustSent(null)}
+          showFlyer={seen}
         />
       ))}
     </ul>
@@ -119,6 +124,7 @@ function EventRow({
   onToggle,
   justSent,
   onSentAnimationEnd,
+  showFlyer,
 }: {
   event: EventItem
   first: boolean
@@ -126,6 +132,7 @@ function EventRow({
   onToggle: () => void
   justSent: boolean
   onSentAnimationEnd: () => void
+  showFlyer: boolean
 }) {
   const panelId = `event-panel-${event.id}`
   // event_date is date-only, which parses as UTC midnight
@@ -200,12 +207,14 @@ function EventRow({
       >
         <div className="overflow-hidden">
           <div className="flex items-start gap-4 px-4 pb-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={event.thumbnail_url || '/GraphicHolder.png'}
-              alt={event.name}
-              className="block h-[163px] w-[131px] shrink-0 border border-white object-cover"
-            />
+            {showFlyer && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={event.thumbnail_url || '/GraphicHolder.png'}
+                alt={event.name}
+                className="block h-[163px] w-[131px] shrink-0 border border-white object-cover"
+              />
+            )}
             {event.description && (
               <p className={`min-w-0 flex-1 text-[12px] leading-normal ${text}`}>{event.description}</p>
             )}
