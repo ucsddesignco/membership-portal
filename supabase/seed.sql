@@ -1,8 +1,67 @@
--- Local development seed. Fake data only.
+-- Local development seed: test users plus copies of the real events.
+-- Streak-testing fixtures live in seeds/streak.sql and load on demand:
+--   supabase db reset && npm run db:seed:streak
 
 alter table events add column if not exists counts_toward_streak boolean not null default false;
 alter table checkins add column if not exists bonus_points integer not null default 0;
 alter table checkins add column if not exists streak_count integer not null default 0;
+alter table events add column if not exists description text;
+alter table events add column if not exists category text;
+
+-- Event feedback: one per attendee per event, not editable, worth a flat 20 points
+
+create table if not exists public.feedback (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id),
+  event_id uuid not null references public.events(id) on delete restrict,
+  rating smallint not null check (rating between 1 and 5),
+  liked text not null check (length(btrim(liked)) between 1 and 2000),
+  improve text not null check (length(btrim(improve)) between 1 and 2000),
+  would_return boolean not null,
+  suggestions text check (suggestions is null or length(suggestions) <= 2000),
+  points_awarded integer not null default 20 check (points_awarded = 20),
+  created_at timestamptz not null default now(),
+  unique (user_id, event_id)
+);
+
+alter table public.feedback enable row level security;
+
+-- No update/delete policies, so submitted feedback can't be edited
+drop policy if exists "insert own feedback for attended events" on public.feedback;
+create policy "insert own feedback for attended events" on public.feedback for insert
+  with check (auth.uid() = user_id and exists (
+    select 1 from public.checkins c where c.user_id = auth.uid() and c.event_id = feedback.event_id));
+
+drop policy if exists "select own feedback" on public.feedback;
+create policy "select own feedback" on public.feedback for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "admins read all feedback" on public.feedback;
+create policy "admins read all feedback" on public.feedback for select
+  using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin));
+
+-- Anonymous views for exporting to Google Sheets from the SQL editor. security_invoker plus the
+-- revoke keeps them from exposing everyone's feedback through the API.
+
+create or replace view public.feedback_export with (security_invoker = true) as
+select e.event_date as "Date", e.name as "Event", e.category as "Type",
+       f.rating as "Rating (1-5)",
+       case when f.would_return then 'Yes' else 'No' end as "Would come again",
+       f.liked as "Liked", f.improve as "Could be better",
+       coalesce(f.suggestions, '') as "Suggestions",
+       f.created_at as "Submitted at"
+from public.feedback f join public.events e on e.id = f.event_id
+order by e.event_date desc, f.created_at;
+
+create or replace view public.feedback_summary with (security_invoker = true) as
+select e.event_date as "Date", e.name as "Event", count(*) as "Responses",
+       round(avg(f.rating), 2) as "Avg rating",
+       round(100.0 * avg(f.would_return::int), 0) as "% would come again"
+from public.feedback f join public.events e on e.id = f.event_id
+group by e.id, e.event_date, e.name
+order by e.event_date desc;
+
+revoke all on public.feedback_export, public.feedback_summary from anon, authenticated;
 
 -- Users (password: password123)
 
@@ -39,31 +98,78 @@ insert into public.profiles (id, email, full_name) values
   ('00000000-0000-0000-0000-0000000000b2', 'b@test.dev', 'Test B'),
   ('00000000-0000-0000-0000-0000000000c3', 'c@test.dev', 'Test C');
 
--- Events: streak-past-1 is the most recent past streak event.
+-- Real events, copied from the production DB so /events shows real names and posters.
+-- Thumbnails point at the production public bucket, which is fine to load from localhost.
 
-insert into public.events (slug, name, points, event_date, active_start, active_end, counts_toward_streak)
-select
-  'streak-past-' || n, 'Streak Past ' || n, 100,
-  (now() - make_interval(weeks => n))::date,
-  now() - make_interval(weeks => n),
-  now() - make_interval(weeks => n) + interval '2 hours',
-  true
-from generate_series(1, 7) as n;
+insert into public.events (id, slug, name, points, thumbnail_url, event_date, active_start, active_end, counts_toward_streak, description) values
+  ('4bb6f943-f021-4f2a-aa7e-0946a6a62e28', 'fall-kickoff-26', 'Fall Kickoff 2026', 100,
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/fall-kickoff-26.png',
+   '2026-09-30', '2026-09-30T18:00:00+00:00', '2026-10-01T08:00:00+00:00', false,
+   'Kick off the year with DCo! Meet the board, learn what we have planned this quarter, and find your design community.'),
+  ('af5f0b25-53ea-4c13-80db-d5a40511174f', 'intro-to-design-26', 'Intro to Design', 100,
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/intro-to-design-26.png',
+   '2026-10-07', '2026-10-08T01:00:00+00:00', '2026-10-08T03:00:00+00:00', true,
+   'Join DCo for an introduction to the absolute fundamentals of design — from various fields to basic principles and elements, we’ll cover all the information you need to start your design journey.'),
+  ('6d4428b0-4c0a-4d8d-ae72-d1a3c9abe9fa', 'slime-social-26', 'Slime Social', 100,
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/slime-social-26.png',
+   '2026-10-14', '2026-10-15T01:30:00+00:00', '2026-10-15T02:45:00+00:00', true,
+   'Take a break and make some slime with fellow designers. Snacks, music, and good company provided.'),
+  ('90e863be-9413-4967-a485-f7861d29f183', 'camp-dco-day1-26', 'Camp DCo Day 1', 100,
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/camp-dco-26.png',
+   '2026-10-21', '2026-10-22T01:00:00+00:00', '2026-10-22T03:00:00+00:00', true,
+   'Day one of Camp DCo, our hands-on workshop series. Bring a laptop and an idea.'),
+  ('00525bc0-9b6e-4e90-a042-5da74ab15a58', 'camp-dco-day2-26', 'Camp DCo Day 2', 100,
+   'https://bxyxpauwhavfwzfhmibk.supabase.co/storage/v1/object/public/event-thumbnails/camp-dco-26.png',
+   '2026-10-28', '2026-10-29T01:30:00+00:00', '2026-10-29T03:00:00+00:00', true,
+   'Day two of Camp DCo, our hands-on workshop series. Keep building on what you started on day one.');
 
-insert into public.events (slug, name, points, event_date, active_start, active_end, counts_toward_streak) values
-  ('non-streak-past', 'Non-Streak Past', 100, (now() - interval '10 days')::date,
-   now() - interval '10 days', now() - interval '10 days' + interval '2 hours', false),
-  ('streak-test', 'Streak Test', 100, now()::date,
-   now() - interval '30 minutes', now() + interval '2 hours', true);
-
--- Check-ins: A attended every past event; B missed streak-past-3; C attended none.
+-- A: attended all but Fall Kickoff, a 3-event streak by Camp DCo Day 1. B: only Fall Kickoff. C: none.
 
 insert into public.checkins (user_id, event_id, points_awarded, checked_in_at)
-select u.id, e.id, 100, e.active_start + interval '15 minutes'
-from public.events e
-cross join (values
-  ('00000000-0000-0000-0000-0000000000a1'::uuid),
-  ('00000000-0000-0000-0000-0000000000b2'::uuid)
-) as u(id)
-where e.slug <> 'streak-test'
-  and not (u.id = '00000000-0000-0000-0000-0000000000b2' and e.slug = 'streak-past-3');
+select u.id, e.id, e.points, e.active_start + interval '15 minutes'
+from (values
+  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'intro-to-design-26'),
+  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'slime-social-26'),
+  ('00000000-0000-0000-0000-0000000000a1'::uuid, 'camp-dco-day1-26'),
+  ('00000000-0000-0000-0000-0000000000b2'::uuid, 'fall-kickoff-26')
+) as u(id, slug)
+join public.events e on e.slug = u.slug;
+
+-- Fill in streak_count and bonus_points the way check-in does (src/lib/streak.ts): the streak is
+-- the run of attended streak events ending at this one, and the bonus is +20% per extra event,
+-- capped at 2x. Every seeded check-in comes after earlier events ended, so any miss breaks it.
+-- Keep in sync with the copy at the end of seeds/streak.sql.
+
+with ranked as (
+  select id, points, row_number() over (order by active_start) as rn
+  from public.events
+  where counts_toward_streak
+),
+runs as (
+  select c.id, r.points,
+    r.rn - coalesce((
+      select max(m.rn) from ranked m
+      where m.rn < r.rn
+        and not exists (select 1 from public.checkins x where x.user_id = c.user_id and x.event_id = m.id)
+    ), 0) as streak
+  from public.checkins c
+  join ranked r on r.id = c.event_id
+)
+update public.checkins c
+set streak_count = runs.streak,
+    bonus_points = round(runs.points * (round(least(1 + 0.2 * (runs.streak - 1), 2), 1) - 1))
+from runs
+where runs.id = c.id;
+
+update public.events set category = 'GBM' where slug in ('fall-kickoff-26', 'intro-to-design-26');
+update public.events set category = 'Social' where slug = 'slime-social-26';
+update public.events set category = 'Workshop' where slug in ('camp-dco-day1-26', 'camp-dco-day2-26');
+
+-- A already sent feedback for Intro to Design, so the Sent state shows without submitting
+
+insert into public.feedback (user_id, event_id, rating, liked, improve, would_return, suggestions)
+select '00000000-0000-0000-0000-0000000000a1', id, 4,
+  'Clear intro to the fundamentals, and the examples were fun.',
+  'It ran a little long. A short break halfway through would help.',
+  true, 'More hands-on mini exercises.'
+from public.events where slug = 'intro-to-design-26';

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -10,16 +10,46 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-neue-plak-extended), ui-sans-serif, system-ui, sans-serif;
   --font-plak: var(--font-neue-plak-extended), ui-sans-serif, system-ui, sans-serif;
+  --font-nb: var(--font-nb-international), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* "+20pts" that drifts up and fades after sending feedback. Tweak timing and distance here. */
+@theme {
+  --animate-float-fade: float-fade 1.2s ease-out forwards;
+  --animate-fade-out: fade-out 1.2s ease-out forwards;
+
+  @keyframes float-fade {
+    0% { opacity: 0; transform: translateY(4px); }
+    15% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-16px); }
+  }
+
+  @keyframes fade-out {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* While the side panel is open: the page behind it dims and can't scroll. */
+[data-menu-dims] {
+  transition: opacity 200ms ease-out;
+}
+
+html[data-menu-open] {
+  overflow: hidden;
+}
+
+html[data-menu-open] [data-menu-dims] {
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-menu-dims] {
+    transition: none;
+  }
 }

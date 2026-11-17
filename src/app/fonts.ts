@@ -46,3 +46,15 @@ export const neuePlakExtended = localFont({
   variable: "--font-neue-plak-extended",
   display: "swap",
 });
+
+export const nbInternational = localFont({
+  src: [
+    {
+      path: "./fonts/NB-International-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-nb-international",
+  display: "swap",
+});

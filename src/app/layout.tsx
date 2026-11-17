@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { neuePlakExtended } from "./fonts";
+import { nbInternational, neuePlakExtended } from "./fonts";
 
 export const metadata: Metadata = {
   title: "DesignCo Attendance",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${neuePlakExtended.variable} h-full antialiased`}
+      className={`${neuePlakExtended.variable} ${nbInternational.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>

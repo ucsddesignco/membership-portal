@@ -34,3 +34,15 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Exporting event feedback
+
+Feedback answers are anonymous in the export. Use these steps to pull them into Google Sheets for board meetings:
+
+1. In the Supabase dashboard, open the **SQL Editor** and run one of these:
+   - `select * from feedback_export;` gives every response: date, event, type, rating, would come again, and the three written answers.
+   - `select * from feedback_summary;` gives one row per event: response count, average rating, and % who would come again.
+2. Click **Export → CSV**.
+3. In Google Sheets, go to **File → Import → Upload**, then choose **Replace current sheet**. Keeping one tab per export works well.
+
+Save both queries as SQL Editor snippets so each export takes one click. The views can only be read from the dashboard. Signed-in members can't read them through the app API.
